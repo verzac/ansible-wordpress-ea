@@ -1,0 +1,31 @@
+---
+- name: Ensure ufw is present
+  apt:
+    name: ufw
+    state: present
+    update_cache: yes
+
+- name: Add certbot's repository
+  apt_repository:
+    repo: ppa:certbot/certbot
+    state: present
+    update_cache: yes
+
+- name: Install certbot
+  apt:
+    name: certbot
+    state: present
+    update_cache: true
+
+- name: Check if certificate already exists
+  stat:
+    path: /etc/letsencrypt/live/{{ domain }}/cert.pem
+  register: letsencrypt_cert
+
+- name: Retrieve certificate using certbot
+  command: certbot certonly --webroot --agree-tos --no-eff-email --email {{ email }} -w /var/www/letsencrypt -d www.{{ domain }} -d {{ domain }}
+  when: not letsencrypt_cert.stat.exists
+
+  
+
+  

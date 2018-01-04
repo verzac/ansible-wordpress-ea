@@ -1,0 +1,6 @@
+---
+system_user: root
+compose_project_dir: /home/{{ system_user }}/tmp-ansible
+domain: benjamintanone.com
+wp_db_name: wordpress
+wp_db_tre: "wp_"

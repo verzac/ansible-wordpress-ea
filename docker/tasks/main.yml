@@ -1,0 +1,56 @@
+---
+- name: Add common dependencies
+  apt: 
+    pkg: "{{ item }}"
+    state: present 
+    update_cache: true
+    install_recommends: no
+  with_items:
+    - ca-certificates
+    - curl
+    - software-properties-common
+    - apt-transport-https
+
+- name: Add docker's apt-key
+  apt_key: 
+    id: 0EBFCD88
+    url: https://download.docker.com/linux/ubuntu/gpg 
+    state: present
+
+- name: Add docker's repository
+  apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+    state: present
+    filename: docker-official
+    update_cache: yes
+
+- debug:
+    msg: Ansible distribution release is {{ ansible_distribution_release }}
+
+- name: Install docker
+  apt: 
+    pkg: "{{ item }}"
+    state: installed 
+    update_cache: true
+  with_items:
+    - docker-ce
+
+- name: Gather system information (uname -s)
+  command: uname -s
+  register: unames
+
+- name: Gather system information (uname -m)
+  command: uname -m
+  register: unamem
+
+- debug:
+    msg: uname -s is {{ unames.stdout }}; uname -m is {{ unamem.stdout }}
+
+- name: Download docker compose binary
+  get_url:
+    url: https://github.com/docker/compose/releases/download/1.18.0/docker-compose-{{ unames.stdout }}-{{ unamem.stdout }}
+    dest: /usr/local/bin/docker-compose
+    mode: 0755
+
+
+  
