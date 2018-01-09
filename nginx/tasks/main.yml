@@ -6,6 +6,12 @@
     state: present
     update_cache: yes
 
+- name: Install nginx
+  apt:
+    name: nginx
+    state: present
+    update_cache: true
+
 - name: Add certbot's repository
   apt_repository:
     repo: ppa:certbot/certbot
@@ -23,19 +29,55 @@
     path: /etc/letsencrypt/live/{{ domain }}/cert.pem
   register: letsencrypt_cert
 
-- name: Retrieve certificate using certbot
-  command: certbot certonly --webroot --agree-tos --no-eff-email --email {{ email }} -w /var/www/letsencrypt -d www.{{ domain }} -d {{ domain }}
-  when: not letsencrypt_cert.stat.exists
+- name: setup nginx directories
+  file:
+    path: "{{ letsencrypt['challenge_dir'] }}/.well-known/acme-challenge"
+    state: directory
+    owner: "{{ system_user }}"
+    group: "{{ system_user }}"
+    recurse: yes
+    mode: 0755
 
-# nginx
-- name: Install nginx
-  apt:
-    name: nginx
-    state: present
-    update_cache: true
-
-- name: deploy nginx config
+- name: deploy letsencrypt snippet
   template:
-    src: defaultsites.j2
-    dest: /etc/nginx/sites-available/default
-  notify: restart nginx
+    src: snippets_letsencrypt.conf.j2
+    dest: /etc/nginx/snippets/letsencrypt.conf
+
+- name: deploy ssl snippet
+  template:
+    src: snippets_ssl.conf.j2
+    dest: /etc/nginx/snippets/ssl.conf
+
+- name: clear sites-enabled for nginx
+  file:
+    path: "/etc/nginx/sites-enabled"
+    state: absent
+
+- name: recreate sites-enabled
+  file:
+    path: "/etc/nginx/sites-enabled"
+    state: directory
+    mode: 0755
+
+- name: deploy initial nginx config to verify using certbot
+  template:
+    src: wpdockersite_init.conf.j2
+    dest: /etc/nginx/sites-available/wpdockersite.conf
+
+- name: create symlink for nginx config in sites-enabled
+  file:
+    src: "/etc/nginx/sites-available/wpdockersite.conf"
+    path: "/etc/nginx/sites-enabled/wpdockersite.conf"
+    state: link
+    owner: "{{ system_user }}"
+    group: "{{ system_user }}"
+    mode: 0744
+  notify: restart nginx  
+
+- name: Retrieve certificate using certbot
+  command: certbot certonly --standalone --non-interactive --agree-tos --email {{ email }} -d {{ domain }} -d www.{{ domain }} --expand
+
+- name: copy actual nginx config for wp docker
+  template:
+    src: wpdockersite.conf.j2
+    dest: /etc/nginx/sites-available/wpdockersite.conf

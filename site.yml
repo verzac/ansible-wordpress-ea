@@ -6,7 +6,6 @@
     - docker
     - wordpress
     - nginx
-    - ssl
   vars_files:
     - defaults/main.yml
   vars_prompt:

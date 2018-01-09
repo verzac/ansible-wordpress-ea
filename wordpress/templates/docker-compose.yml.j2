@@ -16,6 +16,8 @@ services:
      image: wordpress:latest
      ports:
        - "8081:80"
+     volumes:
+       - wp_docker_source:/var/www/html
      restart: always
      environment:
        WORDPRESS_DB_HOST: db:3306
@@ -23,3 +25,4 @@ services:
        WORDPRESS_DB_PASSWORD: {{ wp_db_psw }}
 volumes:
     db_data:
+    wp_docker_source:
