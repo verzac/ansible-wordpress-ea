@@ -1,28 +1,42 @@
 version: '3'
 
 services:
-   db:
-     image: mysql:5.7
-     volumes:
-       - db_data:/var/lib/mysql
-     restart: always
-     environment:
-       MYSQL_ROOT_PASSWORD: {{ wp_db_psw }}
-       MYSQL_DATABASE: {{ wp_db_name }}
+  db:
+    image: mysql:5.7
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: {{ wp_db_psw }}
+      MYSQL_DATABASE: {{ wp_db_name }}
+    deploy:
+      restart_policy:
+        condition: any
+        delay: 0s
+        max_attempts: 5
+        window: 120s
+       
 
-   wordpress:
-     depends_on:
-       - db
-     image: wordpress:latest
-     ports:
-       - "8081:80"
-     volumes:
-       - wp_docker_source:/var/www/html
-     restart: always
-     environment:
-       WORDPRESS_DB_HOST: db:3306
-       WORDPRESS_DB_USER: root
-       WORDPRESS_DB_PASSWORD: {{ wp_db_psw }}
+  wordpress:
+    depends_on:
+      - db
+    image: wordpress:latest
+    ports:
+      - "8081:80"
+    volumes:
+      - wp_docker_source:/var/www/html
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: root
+      WORDPRESS_DB_PASSWORD: {{ wp_db_psw }}
+    deploy:
+      restart_policy:
+        condition: any
+        delay: 0s
+        max_attempts: 5
+        window: 120s
+
 volumes:
-    db_data:
-    wp_docker_source:
+  db_data:
+  wp_docker_source:

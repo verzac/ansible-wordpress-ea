@@ -81,3 +81,4 @@
   template:
     src: wpdockersite.conf.j2
     dest: /etc/nginx/sites-available/wpdockersite.conf
+  notify: restart nginx
