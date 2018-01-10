@@ -77,6 +77,13 @@
 - name: Retrieve certificate using certbot
   command: certbot certonly --standalone --non-interactive --agree-tos --email {{ email }} -d {{ domain }} -d www.{{ domain }} --expand
 
+- name: Add cron job to automatically attempt to renew cert daily
+  template:
+    src: cron_certbotrenew.j2
+    dest: /etc/cron.daily/certbot_renew
+    mode: 0755
+  notify: restart nginx
+
 - name: copy actual nginx config for wp docker
   template:
     src: wpdockersite.conf.j2
