@@ -12,6 +12,17 @@
     state: present
     update_cache: true
 
+- name: Let UFW permit NGINX traffic
+  ufw: 
+    rule: allow
+    name: Nginx Full
+
+- name: Cleanup UFW
+  ufw:
+    rule: allow
+    name: Nginx HTTP
+    delete: yes
+
 - name: Add certbot's repository
   apt_repository:
     repo: ppa:certbot/certbot
@@ -23,11 +34,6 @@
     name: certbot
     state: present
     update_cache: true
-
-- name: Check if certificate already exists
-  stat:
-    path: /etc/letsencrypt/live/{{ domain }}/cert.pem
-  register: letsencrypt_cert
 
 - name: setup nginx directories
   file:
@@ -74,8 +80,15 @@
     mode: 0744
   notify: restart nginx  
 
+- name: Restart NGINX to allow certbot to verify
+  service:
+    name: nginx
+    state: restarted
+
 - name: Retrieve certificate using certbot
-  command: certbot certonly --standalone --non-interactive --agree-tos --email {{ email }} -d {{ domain }} -d www.{{ domain }} --expand
+  # command: certbot certonly --standalone --non-interactive --agree-tos --email {{ email }} -d {{ domain }} -d www.{{ domain }} --expand
+  command: certbot certonly --non-interactive --expand --webroot --agree-tos --no-eff-email --email {{ email }} -w {{ letsencrypt['challenge_dir'] }} -d {{ domain }} -d www.{{ domain }}
+  notify: restart nginx
 
 - name: Add cron job to automatically attempt to renew cert daily
   template:

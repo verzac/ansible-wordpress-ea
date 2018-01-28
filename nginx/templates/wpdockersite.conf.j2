@@ -2,6 +2,7 @@ server {
 	listen 80;
 	listen [::]:80;
 	server_name {{ domain }};
+	include /etc/nginx/snippets/letsencrypt.conf;
 	location / {
 		return 301 https://{{ domain }}$request_uri;
 	}
@@ -11,6 +12,7 @@ server {
 	listen 80 default_server;
 	listen [::]:80 default_server;
 	server_name www.{{ domain }};
+	include /etc/nginx/snippets/letsencrypt.conf;
 	location / {
 		return 301 https://{{ domain }}$request_uri;
 	}
