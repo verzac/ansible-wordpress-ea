@@ -16,7 +16,7 @@ The WordPress stack is built using Docker. To accomplish this, the stack uses tw
 
 ## Additional Notes
 > Q: Will you be supporting this?  
-> A: Not really. After the project is done, I won't be planning to support this repository. It's not meant for outside usage, and is only provided as an example for other people who want to learn how to use Ansible or Dockerized WordPress in a production environment.  
+> A: Not really. I'm not planning to support this repository after I am done with my project. It's not meant for outside usage, and is only provided as an example for other people who want to learn how to use Ansible or Dockerized WordPress in a production environment.  
 
 > Q: This thing is ugly and not scalable! Why?  
-> A: I'm quite new to Ansible and Dockerized WordPress, so my stuffs may not follow best practices. In such case, please feel free to shoot me a message, since I am keen on learning more!  
+> A: I'm quite new to Ansible and Dockerized WordPress, so my playbook(s) may not follow best practices. In such cases, please feel free to shoot me a message, since I am keen on learning more!  
